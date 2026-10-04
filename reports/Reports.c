@@ -9,7 +9,7 @@
 #include "suppliers.h"
 #include "assets.h"
 
-/*LOCAL INPUT HELPER */
+/* LOCAL INPUT HELPER*/
 
 
 static int readInt(const char *prompt)
@@ -44,61 +44,59 @@ static int readInt(const char *prompt)
     }
 }
 
-/* BUDGET AGGREGATION HELPERS */
+/* BUDGET SUMMARY HELPERS (built on getBudget(i)) */
 
 
-float getTotalAllocated(void)
+static double getTotalAllocated(void)
 {
-    int   i;
-    float total = 0.0f;
-    int   count = getBudgetCount();
+    int    i, n = budgetCount();
+    double total = 0.0;
 
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < n; i++) {
         total += getBudget(i).allocatedBudget;
     }
     return total;
 }
 
 
-float getTotalExpenditure(void)
+static double getTotalExpenditure(void)
 {
-    int   i;
-    float total = 0.0f;
-    int   count = getBudgetCount();
+    int    i, n = budgetCount();
+    double total = 0.0;
 
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < n; i++) {
         total += getBudget(i).expenditure;
     }
     return total;
 }
 
 
-float getTotalRemaining(void)
+static double getTotalRemaining(void)
 {
     return getTotalAllocated() - getTotalExpenditure();
 }
 
 
-int getExceededBudgetCount(void)
+static int getExceededBudgetCount(void)
 {
-    int i, n = 0;
-    int count = getBudgetCount();
+    int i, n = budgetCount();
+    int count = 0;
 
-    for (i = 0; i < count; i++) {
-        if (getBudget(i).expenditure > getBudget(i).allocatedBudget) {
-            n++;
+    for (i = 0; i < n; i++) {
+        Budget b = getBudget(i);
+        if (b.expenditure > b.allocatedBudget) {
+            count++;
         }
     }
-    return n;
+    return count;
 }
 
-
-void displayExceededBudgets(void)
+/* Print every department that has overspent. */
+static void displayExceededBudgets(void)
 {
-    int i;
-    int count = getBudgetCount();
+    int i, n = budgetCount();
 
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < n; i++) {
         Budget b = getBudget(i);
         if (b.expenditure > b.allocatedBudget) {
             printf("  - %s (over by N$%.2f)\n",
@@ -108,25 +106,24 @@ void displayExceededBudgets(void)
     }
 }
 
-/* ASSET AGGREGATION HELPER */
+/* ASSET SUMMARY HELPER (built on getAsset(i))*/
 
-
-double getTotalAssetValue(void)
+/* Sum of all purchase values in the asset register. */
+static double getTotalAssetValue(void)
 {
-    int    i;
+    int    i, n = assetCount();
     double total = 0.0;
-    int    count = getAssetCount();
 
-    for (i = 0; i < count; i++) {
-        total += getAsset(i).purchaseValue;
+    for (i = 0; i < n; i++) {
+        total += getAsset(i)->purchaseValue;
     }
     return total;
 }
 
-/*  EMPLOYEE REPORT */
+/* EMPLOYEE REPORT*/
 void employeeReport(void)
 {
-    int count = EmployeeCount();
+    int count = getEmployeeCount();
 
     printf("\n========================================\n");
     printf("           EMPLOYEE REPORT\n");
@@ -143,16 +140,15 @@ void employeeReport(void)
     printf("Lowest Salary   : N$%.2f\n", getLowestSalary());
     printf("----------------------------------------\n");
 
-    
     displayEmployees();
 
     printf("========================================\n");
 }
 
-/* BUDGET REPORT */
+/* BUDGET REPORT*/
 void budgetReport(void)
 {
-    int count = BudgetCount();
+    int count = budgetCount();
 
     printf("\n========================================\n");
     printf("            BUDGET REPORT\n");
@@ -168,7 +164,6 @@ void budgetReport(void)
     printf("Remaining Budget       : N$%.2f\n", getTotalRemaining());
     printf("----------------------------------------\n");
 
-    
     printf("Departments exceeding budget:\n");
     if (getExceededBudgetCount() == 0) {
         printf("  None - all departments are within budget.\n");
@@ -178,16 +173,15 @@ void budgetReport(void)
 
     printf("----------------------------------------\n");
 
-    
     displayBudgets();
 
     printf("========================================\n");
 }
 
-/* SUPPLIER REPORT */
+/* SUPPLIER REPORT*/
 void supplierReport(void)
 {
-    int count = SupplierCount();
+    int count = supplierCount();
 
     printf("\n========================================\n");
     printf("           SUPPLIER REPORT\n");
@@ -209,7 +203,7 @@ void supplierReport(void)
 /* ASSET REPORT*/
 void assetReport(void)
 {
-    int count = AssetCount();
+    int count = assetCount();
 
     printf("\n========================================\n");
     printf("             ASSET REPORT\n");
@@ -220,8 +214,8 @@ void assetReport(void)
         return;
     }
 
-    printf("Total Assets        : %d\n",     count);
-    printf("Total Purchase Value: N$%.2f\n", getTotalAssetValue());
+    printf("Total Assets         : %d\n",     count);
+    printf("Total Purchase Value : N$%.2f\n", getTotalAssetValue());
     printf("----------------------------------------\n");
 
     displayAssets();
@@ -229,7 +223,7 @@ void assetReport(void)
     printf("========================================\n");
 }
 
-/* FULL REPORT (all modules combined)*/
+/* FULL REPORT (all modules combined) */
 void fullReport(void)
 {
     printf("\n########################################\n");
