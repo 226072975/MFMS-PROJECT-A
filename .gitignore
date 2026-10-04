@@ -1,0 +1,12 @@
+# Compiled files
+*.o
+*.obj
+*.exe
+*.out
+
+# Temporary files
+*.tmp
+*.bak
+
+# VS Code local settings
+.vscode/
