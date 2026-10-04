@@ -1,0 +1,139 @@
+/*
+ * main.c
+ * Main menu - Municipal Financial Management System (MFMS)
+ *
+ * This file only shows the main menu and hands control to each module's
+ * own menu function (declared in that module's header):
+ *
+ *   employees.h  -> employeeMenu()
+ *   budget.h     -> budgetMenu()
+ *   suppliers.h  -> supplierMenu()
+ *   assets.h     -> assetMenu()
+ *   reports.h    -> reportsMenu()
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "employees.h"
+#include "budget.h"
+#include "suppliers.h"
+#include "assets.h"
+#include "reports.h"
+
+#define MENU_INVALID  0     /* returned by readMainChoice() for bad input   */
+#define MENU_EOF     (-1)   /* returned when the input stream has ended     */
+
+/* =========================
+   MAIN MENU
+   ========================= */
+
+void displayMenu(void)
+{
+    printf("\n");
+    printf("=============================================\n");
+    printf("   MUNICIPAL FINANCIAL MANAGEMENT SYSTEM\n");
+    printf("=============================================\n");
+    printf("1. Employee Management\n");
+    printf("2. Budget Management\n");
+    printf("3. Supplier Management\n");
+    printf("4. Asset Management\n");
+    printf("5. Reports\n");
+    printf("6. Exit\n");
+    printf("=============================================\n");
+}
+
+/*
+ * Read one menu choice safely.
+ * Returns 1-6 for a valid choice, MENU_INVALID (0) for anything else
+ * (letters, "1abc", "3.7", blank line, number out of range, line too long),
+ * or MENU_EOF if there is no more input.
+ */
+static int readMainChoice(void)
+{
+    char  input[64];
+    char *end;
+    long  value;
+
+    if (fgets(input, sizeof(input), stdin) == NULL) {
+        return MENU_EOF;
+    }
+
+    /* No newline means the line was longer than the buffer: discard the
+       rest so it is not mistaken for the next answer. */
+    if (strchr(input, '\n') == NULL) {
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF) {
+        }
+        return MENU_INVALID;
+    }
+
+    value = strtol(input, &end, 10);
+    if (end == input) {                         /* no digits at all */
+        return MENU_INVALID;
+    }
+    while (isspace((unsigned char)*end)) {      /* allow trailing spaces */
+        end++;
+    }
+    if (*end != '\0') {                         /* leftover text, e.g. "1abc" */
+        return MENU_INVALID;
+    }
+    if (value < 1 || value > 6) {
+        return MENU_INVALID;
+    }
+    return (int)value;
+}
+
+int main(void)
+{
+    int choice = MENU_INVALID;
+
+    do
+    {
+        displayMenu();
+
+        printf("Enter your choice: ");
+        choice = readMainChoice();
+
+        if (choice == MENU_EOF)
+        {
+            printf("\nInput ended. Exiting Municipal Financial Management System...\n");
+            break;
+        }
+
+        switch (choice)
+        {
+            case 1:
+                employeeMenu();
+                break;
+
+            case 2:
+                budgetMenu();
+                break;
+
+            case 3:
+                supplierMenu();
+                break;
+
+            case 4:
+                assetMenu();
+                break;
+
+            case 5:
+                reportsMenu();
+                break;
+
+            case 6:
+                printf("\nExiting Municipal Financial Management System...\n");
+                break;
+
+            default:
+                printf("\nInvalid choice. Please enter a number from 1 to 6.\n");
+        }
+
+    } while (choice != 6);
+
+    return 0;
+}
